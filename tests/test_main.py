@@ -1,12 +1,12 @@
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
-from pytest_qt.qtbot import QtBot
-from my_app.main import MainWindow
+from pytestqt.qtbot import QtBot
+from my_app.main import MainWindow, APP_TITLE
 
 def test_main_window_init(qtbot: QtBot, qapp: QApplication) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
-    assert window.windowTitle() == "Png/Svg/Pdf Viewer"
+    assert window.windowTitle() == APP_TITLE
 
 def test_viewer_zoom(qtbot: QtBot, qapp: QApplication) -> None:
     window = MainWindow()
@@ -27,8 +27,19 @@ def test_viewer_zoom(qtbot: QtBot, qapp: QApplication) -> None:
 def test_file_load_unsupported(qtbot: QtBot, qapp: QApplication) -> None:
     window = MainWindow()
     qtbot.addWidget(window)
-    
-    # Should not crash on unsupported files (or should we add handling?)
+
+    # Unsupported extension should not change the window title
     p = Path("non_existent.xyz")
     window.load_file(p)
-    assert window.windowTitle() == f"Png/Svg/Pdf Viewer - {p.name}"
+    assert window.windowTitle() == APP_TITLE
+
+def test_status_bar_message(qtbot: QtBot, qapp: QApplication) -> None:
+    window = MainWindow()
+    qtbot.addWidget(window)
+
+    assert window._status_bar.currentMessage() == "Ready"
+
+    # Unsupported file shows error in status bar
+    p = Path("test.xyz")
+    window.load_file(p)
+    assert "Error:" in window._status_bar.currentMessage()

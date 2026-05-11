@@ -1,16 +1,16 @@
 [project]
 name = "py-viewer-gemini"
-version = "0.1.0"
-description = "A versatile file viewer for PNG, JPG, PDF, and SVG."
+version = "0.2.0"
+description = "A versatile file viewer for PNG, JPG, SVG, PDF, and Markdown."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "PySide6>=6.7.0",
-    "PyMuPDF>=1.24.0",
+    "Markdown>=3.6.0",
 ]
 
 [project.scripts]
-py-viewer = "my_app.main:main"
+app = "my_app.main:main"
 clean = "my_app.clean:clean"
 
 [build-system]
@@ -34,3 +34,4 @@ target-version = "py312"
 strict = true
 python_version = "3.12"
 ignore_missing_imports = true
+follow_untyped_imports = true

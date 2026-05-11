@@ -1,5 +1,4 @@
 import shutil
-import os
 from pathlib import Path
 
 def clean() -> None:
@@ -12,19 +11,11 @@ def clean() -> None:
     # List of directory names or patterns to remove at root
     dir_targets = [
         "build",
-        "dist",
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
     ]
     
-    # List of file patterns to remove at root
-    file_targets = [
-        "*.pyc",
-        "*.spec", # This will include app.spec, but usually user wants it kept.
-                  # Let's keep app.spec explicitly though.
-    ]
-
     # 1. Remove specific directories at root
     for target in dir_targets:
         path = project_root / target
@@ -32,17 +23,32 @@ def clean() -> None:
             print(f"Removing directory: {path}")
             shutil.rmtree(path, ignore_errors=True)
 
-    # 2. Remove recursive patterns like __pycache__
+    # 2. Clean dist/ but preserve dist/svgvvr.exe
+    dist_dir = project_root / "dist"
+    preserve_file = dist_dir / "svgvvr.exe"
+    if dist_dir.exists() and dist_dir.is_dir():
+        for item in dist_dir.iterdir():
+            if item == preserve_file:
+                print(f"Preserving: {item}")
+                continue
+            if item.is_dir():
+                print(f"Removing directory: {item}")
+                shutil.rmtree(item, ignore_errors=True)
+            else:
+                print(f"Removing file: {item}")
+                item.unlink(missing_ok=True)
+
+    # 3. Remove recursive patterns like __pycache__
     for pycache in project_root.rglob("__pycache__"):
         print(f"Removing recursive __pycache__: {pycache}")
         shutil.rmtree(pycache, ignore_errors=True)
 
-    # 3. Remove recursive file patterns (like .pyc)
+    # 4. Remove recursive file patterns (like .pyc)
     for pyc in project_root.rglob("*.pyc"):
         print(f"Removing file: {pyc}")
         pyc.unlink(missing_ok=True)
 
-    # 4. Handle files at root specifically if needed
+    # 5. Handle files at root specifically if needed
     # We skip app.spec to preserve it as requested previously (implicit in usage)
     for spec in project_root.glob("*.spec"):
         if spec.name == "app.spec":
